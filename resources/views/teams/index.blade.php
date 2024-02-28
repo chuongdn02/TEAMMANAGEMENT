@@ -126,22 +126,27 @@
                     return;
                 }
 
-                if (teamId) {
-                    if (confirm('Do you want to do this action?')) {
-                        const form = document.createElement('form');
-                        form.setAttribute('action', `teams/${teamId}`);
-                        form.setAttribute('method', 'POST');
-                        form.innerHTML = `
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="team_id" value="${teamId}">
-                            <input type="hidden" name="team_name" value="${teamName}">
-                            <input type="hidden" name="department_id" value="${departmentId}">`;
-                        document.body.appendChild(form);
-                        form.submit();
+                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
+                if (!teamExists) {
+                    alert(`Team ID: ${teamId} does not exist`);
+                }else{
+                    if (teamId) {
+                        if (confirm('Do you want to do this action?')) {
+                            const form = document.createElement('form');
+                            form.setAttribute('action', `teams/${teamId}`);
+                            form.setAttribute('method', 'POST');
+                            form.innerHTML = `
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="team_id" value="${teamId}">
+                                <input type="hidden" name="team_name" value="${teamName}">
+                                <input type="hidden" name="department_id" value="${departmentId}">`;
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    } else {
+                        alert('Please select a row or enter Team ID to edit.');
                     }
-                } else {
-                    alert('Please select a row or enter Team ID to edit.');
                 }
             });
 

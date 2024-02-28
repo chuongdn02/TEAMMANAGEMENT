@@ -7,10 +7,15 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## GUIDE
 
 - Update DB_USERNAME,DB_PASSWORD in .env
 - Create appkey >> php artisan key:generate
 - Run >> php artisan migrate 
 - Run php artisan serve
 - Access http://127.0.0.1:8000/ to see the results
+
+## RESULTS
+<p align="center"><img src="public/img/deparment.png" width="400" alt="Laravel Logo"></p>
+<p align="center"><img src="public/img/team.png" width="400" alt="Laravel Logo"></p>
+
