@@ -90,7 +90,7 @@
                 const teamName = teamNameInput.value;
                 const departmentId = departmentIdInput.value;
 
-                if (!teamId || !teamName || !departmentId) {
+                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
                     alert('Please fill in all fields.');
                     return;
                 }
@@ -121,7 +121,7 @@
                 const teamName = teamNameInput.value;
                 const departmentId = departmentIdInput.value;
 
-                if (!teamId || !teamName || !departmentId) {
+                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
                     alert('Please fill in all fields.');
                     return;
                 }
