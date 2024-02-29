@@ -30,9 +30,9 @@
                                 }
                             @endphp
                             <tr class="team-row" data-team-id="{{ $team->team_id }}" data-team-name="{{ $team->team_name }}" data-department-id="{{ $team->department_id }}">
-                                <td>{{ $team->team_id }}</td>
-                                <td>{{ $team->team_name }}</td>
-                                <td>{{ $team_department_name }}</td>
+                                <td>{{ substr($team->team_id, 0, 10) }}</td> 
+                                <td>{{ substr($team->team_name, 0, 20) }}</td>
+                                <td>{{ substr($team_department_name, 0, 20) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
