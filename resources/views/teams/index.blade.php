@@ -31,7 +31,7 @@
                             @endphp
                             <tr class="team-row" data-team-id="{{ $team->team_id }}" data-team-name="{{ $team->team_name }}" data-department-id="{{ $team->department_id }}">
                                 <td>{{ substr($team->team_id, 0, 10) }}</td> 
-                                <td>{{ substr($team->team_name, 0, 20) }}</td>
+                                <td>{{ substr($team->team_name, 0, 20) }}</td> 
                                 <td>{{ substr($team_department_name, 0, 20) }}</td>
                             </tr>
                         @endforeach
@@ -86,35 +86,40 @@
             });
 
             document.getElementById('add-btn').addEventListener('click', function() {
-                const teamId = teamIdInput.value;
-                const teamName = teamNameInput.value;
-                const departmentId = departmentIdInput.value;
+            const teamId = teamIdInput.value.trim();
+            const teamName = teamNameInput.value.trim();
+            const departmentId = departmentIdInput.value.trim();
 
-                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
-                    alert('Please fill in all fields.');
-                    return;
+            const idPattern = /^[a-zA-Z0-9]+$/;
+            if (!idPattern.test(teamId)) {
+                alert('Team ID must contain only letters and numbers.');
+                return;
+            }
+
+            if (!teamId || !teamName || !departmentId) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
+
+            if (teamExists) {
+                alert('Team ID already exists');
+            } else {
+                if (confirm('Do you want to create?')) {
+                    const form = document.createElement('form');
+                    form.setAttribute('action', 'teams');
+                    form.setAttribute('method', 'POST');
+                    form.innerHTML = `
+                        @csrf
+                        <input type="hidden" name="team_id" value="${teamId}">
+                        <input type="hidden" name="team_name" value="${teamName}">
+                        <input type="hidden" name="department_id" value="${departmentId}">`;
+                    document.body.appendChild(form);
+                    form.submit();
                 }
-
-                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
-
-                if (teamExists) {
-                    alert('Team ID already exists');
-                } else {
-                    if (confirm('Do you want to create?')) {
-                        const form = document.createElement('form');
-                        form.setAttribute('action', 'teams');
-                        form.setAttribute('method', 'POST');
-                        form.innerHTML = `
-                            @csrf
-                            <input type="hidden" name="team_id" value="${teamId}">
-                            <input type="hidden" name="team_name" value="${teamName}">
-                            <input type="hidden" name="department_id" value="${departmentId}">`;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                } 
-            });
-
+            } 
+        });
 
             document.getElementById('edit-btn').addEventListener('click', function() {
                 const teamId = teamIdInput.value;
