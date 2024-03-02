@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <title>Team Management</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 </head>
 <body>
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-8">
                 <h2>Team Management</h2>
+                <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search Export...">
                 <table class="table" id="teamTable">
                     <thead>
                         <tr>
@@ -45,10 +47,12 @@
                     <div class="form-group">
                         <label for="team_id">Team ID</label>
                         <input type="text" name="team_id" class="form-control" id="team_id" placeholder="Team ID">
+                        <small id="team_id_error" class="text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label for="team_name">Team Name</label>
                         <input type="text" name="team_name" class="form-control" id="team_name" placeholder="Team Name">
+                        <small id="team_name_error" class="text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label for="department_id">Department</label>
@@ -57,6 +61,7 @@
                                 <option value="{{ $department->department_id }}">{{ $department->department_name }}</option>
                             @endforeach
                         </select>
+                        <small id="department_id_error" class="text-danger"></small> 
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-primary" id="add-btn">Add</button>
@@ -64,122 +69,94 @@
                         <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-success mt-2" id="export-btn">Export to Excel</button>
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const rows = document.querySelectorAll('.team-row');
-            const form = document.getElementById('teamForm');
-            const teamIdInput = document.getElementById('team_id');
-            const teamNameInput = document.getElementById('team_name');
-            const departmentIdInput = document.getElementById('department_id');
+        $(document).ready(function() {
+            var table = $('#teamTable').DataTable();
 
-            rows.forEach(row => {
-                row.addEventListener('click', function() {
-                    rows.forEach(row => row.style.backgroundColor = '');
-                    this.style.backgroundColor = 'lightblue';
-                    teamIdInput.value = this.getAttribute('data-team-id');
-                    teamNameInput.value = this.getAttribute('data-team-name');
-                    departmentIdInput.value = this.getAttribute('data-department-id');
-                });
+            $('#searchInput').on('keyup', function() {
+                const searchText = $(this).val().toLowerCase();
+                table.search(searchText).draw();
             });
 
-            document.getElementById('add-btn').addEventListener('click', function() {
-            const teamId = teamIdInput.value.trim();
-            const teamName = teamNameInput.value.trim();
-            const departmentId = departmentIdInput.value.trim();
+            $('#export-btn').on('click', function() {
+                const tableData = [];
+                $('#teamTable tbody tr').each(function() {
+                    const rowData = [];
+                    $(this).find('td').each(function() {
+                        rowData.push($(this).text());
+                    });
+                    tableData.push(rowData);
+                });
 
-            const idPattern = /^[a-zA-Z0-9]+$/;
-            if (!idPattern.test(teamId)) {
-                alert('Team ID must contain only letters and numbers.');
-                return;
-            }
+                const csvContent = "data:text/csv;charset=utf-8," + tableData.map(e => e.join(",")).join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "team_data.csv");
+                document.body.appendChild(link);
+                link.click();
+            });
 
-            if (!teamId || !teamName || !departmentId) {
-                alert('Please fill in all fields.');
-                return;
-            }
+            $('#teamTable tbody').on('click', 'tr', function() {
+                $('.team-row').removeClass('selected');
+                $(this).addClass('selected');
+                $('#team_id').val($(this).data('team-id'));
+                $('#team_name').val($(this).data('team-name'));
+                $('#department_id').val($(this).data('department-id'));
+            });
 
-            const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
-
-            if (teamExists) {
-                alert('Team ID already exists');
-            } else {
-                if (confirm('Do you want to create?')) {
-                    const form = document.createElement('form');
-                    form.setAttribute('action', 'teams');
-                    form.setAttribute('method', 'POST');
-                    form.innerHTML = `
-                        @csrf
-                        <input type="hidden" name="team_id" value="${teamId}">
-                        <input type="hidden" name="team_name" value="${teamName}">
-                        <input type="hidden" name="department_id" value="${departmentId}">`;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            } 
-        });
-
-            document.getElementById('edit-btn').addEventListener('click', function() {
-                const teamId = teamIdInput.value;
-                const teamName = teamNameInput.value;
-                const departmentId = departmentIdInput.value;
-
-                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
-                    alert('Please fill in all fields.');
+            $('#add-btn').on('click', function() {
+                const teamId = $('#team_id').val();
+                if (!/^[a-zA-Z0-9]+$/.test(teamId)) {
+                    $('#team_id_error').text('Team ID must contain only letters and numbers.');
                     return;
                 }
+                $('#teamForm').submit();
+            });
 
-                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
-                if (!teamExists) {
-                    alert(`Team ID: ${teamId} does not exist`);
-                }else{
-                    if (teamId) {
-                        if (confirm('Do you want to do this action?')) {
-                            const form = document.createElement('form');
-                            form.setAttribute('action', `teams/${teamId}`);
-                            form.setAttribute('method', 'POST');
-                            form.innerHTML = `
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="team_id" value="${teamId}">
-                                <input type="hidden" name="team_name" value="${teamName}">
-                                <input type="hidden" name="department_id" value="${departmentId}">`;
-                            document.body.appendChild(form);
-                            form.submit();
-                        }
-                    } else {
-                        alert('Please select a row or enter Team ID to edit.');
-                    }
+            $('#edit-btn').on('click', function() {
+                const teamId = $('#team_id').val();
+                if (!teamId) {
+                    alert('Please select a row to edit.');
+                    return;
+                }
+                $('#teamForm').attr('action', 'teams/' + teamId);
+                $('#teamForm').attr('method', 'POST');
+                $('#teamForm').append('@csrf');
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: '_method',
+                    value: 'PUT'
+                }).appendTo('#teamForm');
+                $('#teamForm').submit();
+            });
+
+            $('#delete-btn').on('click', function() {
+                const teamId = $('#team_id').val();
+                if (!teamId) {
+                    alert('Please select a row to delete.');
+                    return;
+                }
+                if (confirm('Are you sure you want to delete this team?')) {
+                    $('#teamForm').attr('action', 'teams/' + teamId);
+                    $('#teamForm').attr('method', 'POST');
+                    $('#teamForm').append('@csrf');
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: '_method',
+                        value: 'DELETE'
+                    }).appendTo('#teamForm');
+                    $('#teamForm').submit();
                 }
             });
-
-            document.getElementById('delete-btn').addEventListener('click', function() {
-                const teamId = teamIdInput.value;
-
-                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
-
-                if (!teamExists) {
-                    alert(`Team ID: ${teamId} does not exist`);
-                }else{
-                    if (teamId) {
-                        if (confirm(`Are you sure you want to delete Team ID: ${teamId}?`)) {
-                            const form = document.createElement('form');
-                            form.setAttribute('action', `teams/${teamId}`);
-                            form.setAttribute('method', 'POST');
-                            form.innerHTML = `
-                                @csrf
-                                @method('DELETE')`;
-                            document.body.appendChild(form);
-                            form.submit();
-                        }
-                    } else {
-                        alert('Please select a row or enter Team ID to delete.');
-                    }
-                } 
-            });
         });
+
     </script>
 </body>
 </html>
