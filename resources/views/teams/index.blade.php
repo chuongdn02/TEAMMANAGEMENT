@@ -118,10 +118,18 @@
                 const teamName = $('#team_name').val();
                 const departmentId = $('#department_id').val();
 
-                if (!teamId || !teamName || !departmentId) {
+                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
                     if (!teamId) $('#team_id_error').text('Team ID is required.');
                     if (!teamName) $('#team_name_error').text('Team Name is required.');
                     if (!departmentId) $('#department_id_error').text('Department is required.');
+                    return;
+                }
+
+                const rows = document.querySelectorAll('#teamTable tbody tr');
+                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
+
+                if (teamExists) {
+                    $('#team_id_error').text('Team ID already exists.');
                     return;
                 }
 
@@ -135,10 +143,23 @@
 
             $('#edit-btn').on('click', function() {
                 const teamId = $('#team_id').val();
-                if (!teamId) {
-                    alert('Please select a row to edit.');
+                const teamName = $('#team_name').val();
+                const departmentId = $('#department_id').val();
+                const rows = document.querySelectorAll('#teamTable tbody tr');
+                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
+                
+                if (!teamExists) {
+                    alert('Team ID does not exist.');
                     return;
                 }
+
+                if (!teamId.trim() || !teamName.trim() || !departmentId.trim()) {
+                    if (!teamId.trim()) $('#team_id_error').text('Team ID is required.');
+                    if (!teamName.trim()) $('#team_name_error').text('Team Name is required.');
+                    if (!departmentId.trim()) $('#department_id_error').text('Department is required.');
+                    return;
+                }
+
                 $('#teamForm').attr('action', 'teams/' + teamId);
                 $('#teamForm').attr('method', 'POST');
                 $('#teamForm').append('@csrf');
@@ -150,12 +171,22 @@
                 $('#teamForm').submit();
             });
 
+
             $('#delete-btn').on('click', function() {
                 const teamId = $('#team_id').val();
-                if (!teamId) {
+                const rows = document.querySelectorAll('#teamTable tbody tr');
+                const teamExists = Array.from(rows).some(row => row.getAttribute('data-team-id') === teamId);
+
+                if (!teamId.trim()) {
                     alert('Please select a row to delete.');
                     return;
                 }
+
+                if (!teamExists) {
+                    alert('Team ID does not exist.');
+                    return;
+                }
+
                 if (confirm('Are you sure you want to delete this team?')) {
                     $('#teamForm').attr('action', 'teams/' + teamId);
                     $('#teamForm').attr('method', 'POST');
@@ -169,6 +200,7 @@
                 }
             });
         });
+
 
     </script>
 </body>
