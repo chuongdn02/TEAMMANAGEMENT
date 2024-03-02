@@ -10,7 +10,6 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-8">
-                <h2>Team Management</h2>
                 <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search Export...">
                 <table class="table" id="teamTable">
                     <thead>
@@ -65,11 +64,14 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-primary" id="add-btn">Add</button>
-                        <button type="button" class="btn btn-warning" id="edit-btn">Edit</button>
+                        <button type="button" class="btn btn-warning" id="edit-btn">Update</button>
                         <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
                     </div>
                 </form>
                 <button type="button" class="btn btn-success mt-2" id="export-btn">Export to Excel</button>
+                
+            </div>
+            <a href="departments" class="btn btn-info mt-2">Manage Departments</a>
             </div>
         </div>
     </div>
@@ -116,7 +118,6 @@
                 const teamName = $('#team_name').val();
                 const departmentId = $('#department_id').val();
 
-                // Kiểm tra xem các trường đã được điền đầy đủ hay không
                 if (!teamId || !teamName || !departmentId) {
                     if (!teamId) $('#team_id_error').text('Team ID is required.');
                     if (!teamName) $('#team_name_error').text('Team Name is required.');
@@ -124,7 +125,6 @@
                     return;
                 }
 
-                // Kiểm tra nếu giá trị nhập vào không chỉ chứa chữ và số
                 if (!/^[a-zA-Z0-9]+$/.test(teamId)) {
                     $('#team_id_error').text('Team ID must contain only letters and numbers.');
                     return;

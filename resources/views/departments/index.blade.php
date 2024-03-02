@@ -30,6 +30,7 @@
                 </li>
             @endforeach
         </ul>
+        <a href="teams" class="btn btn-info mt-2">Manage Teams</a>
     </div>
 
     <script>
