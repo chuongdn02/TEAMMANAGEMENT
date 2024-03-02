@@ -113,10 +113,23 @@
 
             $('#add-btn').on('click', function() {
                 const teamId = $('#team_id').val();
+                const teamName = $('#team_name').val();
+                const departmentId = $('#department_id').val();
+
+                // Kiểm tra xem các trường đã được điền đầy đủ hay không
+                if (!teamId || !teamName || !departmentId) {
+                    if (!teamId) $('#team_id_error').text('Team ID is required.');
+                    if (!teamName) $('#team_name_error').text('Team Name is required.');
+                    if (!departmentId) $('#department_id_error').text('Department is required.');
+                    return;
+                }
+
+                // Kiểm tra nếu giá trị nhập vào không chỉ chứa chữ và số
                 if (!/^[a-zA-Z0-9]+$/.test(teamId)) {
                     $('#team_id_error').text('Team ID must contain only letters and numbers.');
                     return;
                 }
+
                 $('#teamForm').submit();
             });
 
