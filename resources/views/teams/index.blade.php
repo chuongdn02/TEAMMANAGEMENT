@@ -10,7 +10,6 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-8">
-                <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search Export...">
                 <table class="table" id="teamTable">
                     <thead>
                         <tr>
